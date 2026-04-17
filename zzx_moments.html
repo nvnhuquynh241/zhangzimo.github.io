@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>张子墨 ZHANG ZIMO | 官方个人档案</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    
+    <style>
+        :root {
+            --bg-color: #0d0d0d;      /* 纯黑背景 */
+            --accent-color: #9e9e9e;  /* 银灰色强调 */
+            --text-main: #ffffff;
+            --text-sub: #888888;
+            --font-title: 'Noto Serif SC', serif;
+            --font-body: 'Noto Sans SC', sans-serif;
+            --ease: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 自定义光标 */
+        #cursor {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            mix-blend-mode: difference;
+            z-index: 9999;
+            transition: transform 0.3s var(--ease);
+        }
+
+        /* 导航栏 */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 30px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: var(--font-title);
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+        }
+
+        nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            margin-left: 30px;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            opacity: 0.6;
+            transition: 0.3s;
+        }
+
+        nav a:hover { opacity: 1; }
+
+        /* Hero 视频区域 */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-video-wrap {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 120%; /* 视差预留空间 */
+            z-index: -1;
+        }
+
+        .hero-video-wrap video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* 意识流风格：调低亮度，增加一点点模糊和冷色调 */
+    filter: brightness(0.6) contrast(1.1) saturate(0.8);
+}
+
+/* 添加一个呼吸感的文字动画，模拟冬天的感觉 */
+.reveal-text {
+    animation: breathe 4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+    0%, 100% { opacity: 0.8; transform: translateY(0); filter: blur(0px); }
+    50% { opacity: 1; transform: translateY(-5px); filter: blur(1px); }
+}
+
+        .hero-info { text-align: center; }
+        .hero-info h1 {
+            font-family: var(--font-title);
+            font-size: 8vw;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .hero-info p {
+            font-size: 1rem;
+            letter-spacing: 8px;
+            color: var(--accent-color);
+            text-transform: uppercase;
+        }
+
+        /* 档案详情部分 */
+        .about-section {
+            padding: 150px 10%;
+            display: flex;
+            gap: 100px;
+            align-items: center;
+        }
+
+        .about-text h2 {
+            font-family: var(--font-title);
+            font-size: 3rem;
+            margin-bottom: 30px;
+        }
+
+        .about-details p {
+            font-size: 1.1rem;
+            line-height: 2;
+            color: var(--text-sub);
+            margin-bottom: 10px;
+        }
+
+        .about-details span { color: var(--text-main); font-weight: 600; }
+
+        /* 照片墙区域 */
+        .gallery { padding: 100px 5%; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            grid-auto-rows: 300px;
+        }
+        .grid-item { overflow: hidden; position: relative; border-radius: 4px; }
+        .grid-item img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: 1s var(--ease);
+            filter: grayscale(100%);
+        }
+        .grid-item:hover img { transform: scale(1.1); filter: grayscale(0%); }
+        .span-2 { grid-column: span 2; }
+        .row-2 { grid-row: span 2; }
+
+        /* 音乐轮播区域 */
+        .swiper-section { padding: 100px 0; background: #080808; }
+        .swiper { width: 100%; padding: 50px 0; }
+        .swiper-slide {
+            width: 400px; height: 500px;
+            background: #111;
+            display: flex; flex-direction: column;
+            border-radius: 8px; overflow: hidden;
+            opacity: 0.3; transition: 0.5s;
+        }
+        .swiper-slide-active { opacity: 1; transform: scale(1.05); }
+        .swiper-slide img { width: 100%; height: 80%; object-fit: cover; }
+        .slide-info { padding: 20px; }
+
+        footer {
+            padding: 100px 50px;
+            text-align: center;
+            border-top: 1px solid #222;
+            color: var(--text-sub);
+            font-size: 0.8rem;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            header { padding: 20px; }
+            .hero-info h1 { font-size: 4rem; }
+            .about-section { flex-direction: column; text-align: center; gap: 50px; }
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cursor"></div>
+
+    <header>
+        <div class="logo">ZHANG ZIMO</div>
+        <nav>
+            <a href="#about">关于</a>
+            <a href="#gallery">影像</a>
+            <a href="#music">作品</a>
+        </nav>
+    </header>
+
+<section class="hero">
+    <div class="hero-video-wrap">
+        <video autoplay muted loop playsinline src="zimo_winter.mp4"></video>
+    </div>
+    <div class="hero-info">
+        <h1 class="reveal-text">17岁的冬季</h1>
+        <p style="letter-spacing: 5px;">ZHANG ZIMO / IN MY FEELINGS</p>
+        <div class="scrolling-line" style="width: 1px; height: 80px; background: #fff; margin: 20px auto; opacity: 0.5;"></div>
+    </div>
+</section>
+
+    <section id="about" class="about-section">
+        <div class="about-text">
+            <h2>创作歌手<br>张子墨</h2>
+        </div>
+        <div class="about-details">
+            <p><span>生日：</span>2008年2月20日</p>
+            <p><span>核心特质：</span>不被定义的音乐灵魂，执着于节奏与旋律的碰撞。</p>
+            <p><span>代表作：</span>在每一个创作的深夜，寻找名为“自愈”的音符。</p>
+            <p>他以独特的嗓音和深刻的歌词，书写着属于18岁的少年意气与沉思。</p>
+        </div>
+    </section>
+
+    <section id="gallery" class="gallery">
+        <div class="grid">
+            <div class="grid-item span-2 row-2"><img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=2070" alt="子墨"></div>
+            <div class="grid-item"><img src="https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=2070" alt="创作"></div>
+            <div class="grid-item row-2"><img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070" alt="舞台"></div>
+            <div class="grid-item"><img src="https://images.unsplash.com/photo-1514525253361-bee8a187499b?q=80&w=2070" alt="灯光"></div>
+            <div class="grid-item span-2"><img src="https://images.unsplash.com/photo-1516280440614-37939bb9120?q=80&w=2070" alt="录音室"></div>
+        </div>
+    </section>
+
+    <section id="music" class="swiper-section">
+        <div class="swiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <img src="https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?q=80&w=2070">
+                    <div class="slide-info"><h3>舞台演出</h3><p>Live Performance</p></div>
+                </div>
+                <div class="swiper-slide">
+                    <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=2070">
+                    <div class="slide-info"><h3>词曲创作</h3><p>Original Works</p></div>
+                </div>
+                <div class="swiper-slide">
+                    <img src="https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=2070">
+                    <div class="slide-info"><h3>练习瞬间</h3><p>Daily Routine</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 张子墨 ZHANG ZIMO ARCHIVE. 为创作与才华而建。</p>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.27/bundled/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <script>
+        // 初始化平滑滚动
+        const lenis = new Lenis();
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // 自定义光标移动
+        const cursor = document.getElementById('cursor');
+        window.addEventListener('mousemove', e => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
+        });
+
+        // Hero 视频视差效果
+        gsap.to(".hero-video-wrap", {
+            y: "20%",
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".hero",
+                start: "top top",
+                end: "bottom top",
+                scrub: true
+            }
+        });
+
+        // 标题文字渐显
+        gsap.from(".reveal-text", {
+            y: 100,
+            opacity: 0,
+            duration: 1.5,
+            ease: "power4.out",
+            delay: 0.5
+        });
+
+        // 网格图片进入动画
+        gsap.from(".grid-item", {
+            scale: 0.8,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.1,
+            scrollTrigger: {
+                trigger: ".grid",
+                start: "top 80%"
+            }
+        });
+
+        // 初始化 Swiper
+        new Swiper('.swiper', {
+            slidesPerView: 'auto',
+            centeredSlides: true,
+            spaceBetween: 50,
+            loop: true,
+            grabCursor: true
+        });
+    </script>
+</body>
+</html>
