@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>张子墨·薄巧时光机 | Mint Moments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #F1FBF9;
+            color: #2C1E16;
+            overflow-x: hidden;
+        }
+
+        .mint-gradient {
+            background: linear-gradient(135deg, #A7FFEB 0%, #84E1CC 100%);
+        }
+
+        @keyframes danmaku {
+            from { transform: translateX(100vw); }
+            to { transform: translateX(-200%); }
+        }
+
+        .danmaku-item {
+            position: fixed;
+            white-space: nowrap;
+            z-index: 60;
+            pointer-events: none;
+            font-weight: 900;
+            font-size: 1.25rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            animation: danmaku linear forwards;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: #E0F2F1;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .modal-enter {
+            animation: modalFadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+</head>
+<body class="pb-24">
+
+    <!-- 加载遮罩 -->
+    <div id="loadingScreen" class="loading-overlay">
+        <div class="w-16 h-16 border-4 border-[#3D2B1F] border-t-[#A7FFEB] rounded-full animate-spin"></div>
+        <span class="mt-4 text-[#3D2B1F] font-bold tracking-widest text-sm uppercase">MINTY LOADING...</span>
+    </div>
+
+    <!-- 弹幕容器 -->
+    <div id="danmakuContainer" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
+
+    <!-- 导航栏 -->
+    <header class="sticky top-0 z-40 bg-[#A7FFEB]/90 backdrop-blur-md border-b border-[#84E1CC] px-6 py-4">
+        <div class="max-w-5xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-[#3D2B1F] rounded-2xl text-[#A7FFEB] shadow-lg">
+                    <i class="fas fa-music text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black tracking-tighter text-[#3D2B1F]">张子墨 <span class="font-light">| MOMENTS</span></h1>
+                    <p class="text-[10px] uppercase tracking-[0.2em] text-[#4E7A71]">Mint Chocolate Edition</p>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="openModal('danmakuModal')" class="bg-white text-[#3D2B1F] p-2.5 rounded-full shadow-md border border-[#A7FFEB] hover:bg-[#A7FFEB]/10 transition-all">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                <button onclick="openModal('addMomentModal')" class="bg-[#3D2B1F] text-[#A7FFEB] px-5 py-2.5 rounded-full font-bold text-sm shadow-md transition-all active:scale-95 flex items-center gap-2 hover:bg-[#5D4037]">
+                    <i class="fas fa-plus"></i><span>存入照片</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto p-6 space-y-12">
+        <!-- 个人资料卡片 -->
+        <div class="bg-[#3D2B1F] rounded-[2.5rem] p-8 relative overflow-hidden shadow-2xl">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-[#A7FFEB] opacity-10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+            <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                <div class="relative group cursor-pointer" onclick="document.getElementById('avatarInput').click()">
+                    <div class="w-32 h-32 rounded-full border-4 border-[#A7FFEB] p-1 overflow-hidden shadow-xl bg-white">
+                        <img id="profileAvatar" src="https://p6.itc.cn/images01/20231215/224a1b0b555e4b6eb35a39626359e19d.jpeg" class="w-full h-full object-cover rounded-full transition-all duration-500 group-hover:scale-110 group-hover:brightness-50">
+                    </div>
+                    <div id="avatarLoading" class="hidden absolute inset-0 flex items-center justify-center bg-black/40 rounded-full">
+                        <i class="fas fa-spinner fa-spin text-white text-xl"></i>
+                    </div>
+                    <div class="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i class="fas fa-camera text-2xl"></i>
+                    </div>
+                    <input type="file" id="avatarInput" hidden accept="image/*" onchange="uploadFile(event, 'avatar')">
+                </div>
+
+                <div class="text-center md:text-left flex-1">
+                    <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
+                        <h2 class="text-3xl font-bold text-[#A7FFEB]">张子墨</h2>
+                        <i class="fas fa-sparkles text-[#FFD54F]"></i>
+                    </div>
+                    <p id="profileBio" class="text-[#B2DFDB] text-sm max-w-md leading-relaxed italic">
+                        ❄️ 雪景中的子墨，是冬日里最清新的薄荷巧克力。
+                    </p>
+                    <div class="flex gap-3 mt-4 justify-center md:justify-start">
+                        <span class="px-3 py-1 bg-[#A7FFEB]/10 border border-[#A7FFEB]/30 rounded-full text-[10px] text-[#A7FFEB] uppercase tracking-wider font-bold"># SnowGentle</span>
+                        <span class="px-3 py-1 bg-[#A7FFEB]/10 border border-[#A7FFEB]/30 rounded-full text-[10px] text-[#A7FFEB] uppercase tracking-wider font-bold"># MainVocal</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 照片墙 -->
+        <section>
+            <div class="flex items-center gap-2 mb-6 px-2">
+                <i class="fas fa-image text-[#3D2B1F]"></i>
+                <h3 class="font-black text-xl text-[#3D2B1F] tracking-tight">私人时光机 <span id="momentCount" class="text-[#4E7A71] text-sm font-normal">(0)</span></h3>
+            </div>
+            <div id="momentsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 由 JS 注入内容 -->
+            </div>
+        </section>
+
+        <!-- 留言板 -->
+        <section class="bg-white/40 rounded-[3rem] p-8 border border-[#A7FFEB]/30 shadow-inner">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-comment-dots text-[#3D2B1F]"></i>
+                    <h3 class="font-black text-2xl text-[#3D2B1F] tracking-tight">墨色寄语</h3>
+                </div>
+                <button onclick="openModal('danmakuModal')" class="text-sm font-black text-[#4E7A71] underline decoration-[#A7FFEB] decoration-2 underline-offset-4">我也要表白</button>
+            </div>
+            <div id="messageBoard" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- 由 JS 注入内容 -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal: 存入照片 -->
+    <div id="addMomentModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-[#2C1E16]/60 backdrop-blur-md">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 modal-enter">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-[#3D2B1F]">存入时光</h3>
+                <button onclick="closeModal('addMomentModal')"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="space-y-4">
+                <div onclick="document.getElementById('momentFileInput').click()" class="w-full aspect-video rounded-3xl border-2 border-dashed border-[#A7FFEB] bg-[#F1FBF9] flex flex-col items-center justify-center cursor-pointer overflow-hidden relative group">
+                    <img id="previewImage" class="hidden w-full h-full object-cover">
+                    <div id="uploadPlaceholder" class="flex flex-col items-center text-[#4E7A71]">
+                        <i class="fas fa-cloud-upload-alt text-2xl mb-2 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-sm font-black">点击选择照片</span>
+                    </div>
+                    <input type="file" id="momentFileInput" hidden accept="image/*" onchange="uploadFile(event, 'moment')">
+                </div>
+                <input id="momentTitle" type="text" placeholder="标题" class="w-full px-6 py-4 rounded-2xl bg-[#F1FBF9] border border-[#A7FFEB] focus:outline-none font-bold">
+                <input id="momentDate" type="date" class="w-full px-6 py-4 rounded-2xl bg-[#F1FBF9] border border-[#A7FFEB] focus:outline-none font-bold">
+                <textarea id="momentDesc" placeholder="这一刻的心情..." class="w-full px-6 py-4 rounded-2xl bg-[#F1FBF9] border border-[#A7FFEB] focus:outline-none h-24 resize-none"></textarea>
+                <button id="saveBtn" onclick="saveMoment()" class="w-full bg-[#3D2B1F] text-[#A7FFEB] font-black py-4 rounded-3xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2">
+                    <span id="saveBtnText">确认存入时光机</span>
+                    <i id="saveBtnIcon" class="hidden fas fa-spinner fa-spin"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: 发送弹幕 -->
+    <div id="danmakuModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-[#2C1E16]/60 backdrop-blur-md">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 modal-enter">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-black text-[#3D2B1F]">发送弹幕</h3>
+                <button onclick="closeModal('danmakuModal')"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            <div class="space-y-4">
+                <input id="danmakuInput" type="text" maxlength="40" placeholder="对子墨的告白..." class="w-full px-6 py-5 rounded-2xl bg-[#F1FBF9] border border-[#A7FFEB] focus:outline-none font-black text-lg">
+                <button onclick="sendDanmaku()" class="w-full bg-[#A7FFEB] text-[#3D2B1F] font-black py-5 rounded-3xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 text-lg">
+                    <i class="fas fa-paper-plane"></i> 发送
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase 配置 ---
+        // 注意：如果你在本地运行，请将下面的配置替换为你自己的 Firebase 配置
+        let firebaseConfig;
+        try {
+            firebaseConfig = JSON.parse(__firebase_config);
+        } catch (e) {
+            console.warn("未检测到环境配置，请在代码中手动填入 firebaseConfig");
+            firebaseConfig = {
+                apiKey: "", 
+                authDomain: "",
+                projectId: "",
+                storageBucket: "",
+                messagingSenderId: "",
+                appId: ""
+            };
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'zimo-moments-demo';
+
+        let user = null;
+        let tempImageUrl = null;
+        let unsubscribes = [];
+
+        // --- UI 逻辑 ---
+        window.openModal = (id) => {
+            document.getElementById(id).style.display = 'flex';
+        };
+
+        window.closeModal = (id) => {
+            document.getElementById(id).style.display = 'none';
+        };
+
+        window.uploadFile = (e, type) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const base64Data = event.target.result;
+                if (type === 'avatar') {
+                    if (!user) return;
+                    try {
+                        document.getElementById('avatarLoading').classList.remove('hidden');
+                        const profileRef = doc(db, 'artifacts', appId, 'public', 'data', 'profile', 'main');
+                        await setDoc(profileRef, { avatar: base64Data }, { merge: true });
+                    } catch (err) {
+                        console.error(err);
+                    } finally {
+                        document.getElementById('avatarLoading').classList.add('hidden');
+                    }
+                } else {
+                    tempImageUrl = base64Data;
+                    const preview = document.getElementById('previewImage');
+                    preview.src = base64Data;
+                    preview.classList.remove('hidden');
+                    document.getElementById('uploadPlaceholder').classList.add('hidden');
+                }
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.saveMoment = async () => {
+            if (!user) return;
+            const title = document.getElementById('momentTitle').value;
+            const date = document.getElementById('momentDate').value;
+            const desc = document.getElementById('momentDesc').value;
+            if (!tempImageUrl || !title) return alert("请上传照片并输入标题");
+
+            try {
+                const momentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'moments');
+                await addDoc(momentsRef, {
+                    title, date, description: desc, imageUrl: tempImageUrl, createdAt: serverTimestamp(), userId: user.uid
+                });
+                closeModal('addMomentModal');
+            } catch (err) {
+                alert("保存失败，请检查配置");
+            }
+        };
+
+        window.sendDanmaku = async () => {
+            const input = document.getElementById('danmakuInput');
+            const text = input.value.trim();
+            if (!text || !user) return;
+            try {
+                const msgRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
+                await addDoc(msgRef, { text, userId: user.uid, createdAt: serverTimestamp() });
+                input.value = "";
+                closeModal('danmakuModal');
+            } catch (err) { console.error(err); }
+        };
+
+        window.deleteItem = async (colName, docId) => {
+            if (!confirm("确定删除吗？")) return;
+            try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', colName, docId));
+            } catch (err) { console.error(err); }
+        };
+
+        function createDanmaku(text) {
+            const container = document.getElementById('danmakuContainer');
+            const el = document.createElement('div');
+            el.className = 'danmaku-item';
+            el.innerText = text;
+            el.style.top = `${Math.random() * 70 + 10}%`;
+            el.style.animationDuration = `${Math.random() * 5 + 10}s`;
+            container.appendChild(el);
+            el.onanimationend = () => el.remove();
+        }
+
+        // --- 数据监听 ---
+        function setupListeners() {
+            unsubscribes.push(onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'profile', 'main'), snap => {
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.avatar) document.getElementById('profileAvatar').src = data.avatar;
+                    if (data.bio) document.getElementById('profileBio').innerText = data.bio;
+                }
+            }));
+
+            unsubscribes.push(onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'moments'), snap => {
+                const grid = document.getElementById('momentsGrid');
+                grid.innerHTML = "";
+                const moments = snap.docs.map(d => ({id: d.id, ...d.data()}));
+                document.getElementById('momentCount').innerText = `(${moments.length})`;
+                moments.forEach(m => {
+                    const card = document.createElement('div');
+                    card.className = "bg-white rounded-3xl overflow-hidden shadow-md relative group";
+                    card.innerHTML = `
+                        <img src="${m.imageUrl}" class="w-full aspect-[3/4] object-cover">
+                        <button onclick="deleteItem('moments', '${m.id}')" class="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><i class="fas fa-trash"></i></button>
+                        <div class="p-4"><h4 class="font-bold">${m.title}</h4><p class="text-xs text-gray-500">${m.date || ''}</p></div>
+                    `;
+                    grid.appendChild(card);
+                });
+            }));
+
+            unsubscribes.push(onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'messages'), snap => {
+                const board = document.getElementById('messageBoard');
+                board.innerHTML = "";
+                snap.docs.forEach(d => {
+                    const msg = d.data();
+                    const el = document.createElement('div');
+                    el.className = "bg-white p-4 rounded-2xl shadow-sm border-l-4 border-[#A7FFEB]";
+                    el.innerText = msg.text;
+                    board.appendChild(el);
+                    createDanmaku(msg.text);
+                });
+            }));
+        }
+
+        // --- 初始化 ---
+        async function start() {
+            onAuthStateChanged(auth, u => {
+                if (u) {
+                    user = u;
+                    setupListeners();
+                    document.getElementById('loadingScreen').style.opacity = '0';
+                    setTimeout(() => document.getElementById('loadingScreen').remove(), 500);
+                } else {
+                    const login = async () => {
+                        try {
+                            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                                await signInWithCustomToken(auth, __initial_auth_token);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (e) { console.error(e); }
+                    };
+                    login();
+                }
+            });
+        }
+
+        window.onload = start;
+    </script>
+</body>
+</html>
