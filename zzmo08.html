@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>张子墨·薄巧时光机 | Mint Moments v2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        
+        :root {
+            /* 薄巧核心配色方案 */
+            --mint-50: #F0FFF9;
+            --mint-100: #CCFFEF;
+            --mint-400: #5EEAD4;
+            --mint-500: #2DD4BF; /* 核心薄荷绿 */
+            --choco-800: #3D2B1F; /* 巧克力棕 */
+            --choco-900: #2C1E16; /* 深黑巧 */
+            
+            /* 玻璃拟态与阴影 */
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(45, 212, 191, 0.2);
+            --shadow-mint: 0 10px 30px -5px rgba(45, 212, 191, 0.3);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--mint-50);
+            background-image: radial-gradient(circle at 2px 2px, var(--mint-100) 1px, transparent 0);
+            background-size: 40px 40px;
+            color: var(--choco-900);
+            scroll-behavior: smooth;
+        }
+
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+        }
+
+        .mint-card-gradient {
+            background: linear-gradient(135deg, var(--choco-900) 0%, #443023 100%);
+        }
+
+        .mint-gradient-text {
+            background: linear-gradient(135deg, var(--choco-900) 0%, var(--mint-500) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* 动画效果 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(1deg); }
+        }
+
+        .animate-float { animation: float 4s ease-in-out infinite; }
+
+        @keyframes danmaku-flow {
+            from { transform: translateX(100%); }
+            to { transform: translateX(-200%); }
+        }
+
+        .danmaku-item {
+            position: fixed;
+            white-space: nowrap;
+            z-index: 55;
+            pointer-events: none;
+            font-weight: 800;
+            color: var(--choco-900);
+            background: var(--mint-100);
+            padding: 10px 24px;
+            border-radius: 20px;
+            border: 2px solid var(--mint-400);
+            box-shadow: var(--shadow-mint);
+            animation: danmaku-flow linear forwards;
+        }
+
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--mint-50); }
+        ::-webkit-scrollbar-thumb { background: var(--mint-500); border-radius: 10px; border: 2px solid var(--mint-50); }
+
+        /* 卡片交互 */
+        .moment-card {
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .moment-card:hover {
+            transform: scale(1.03) translateY(-12px);
+            box-shadow: 0 40px 80px -15px rgba(44, 30, 22, 0.1);
+        }
+
+        .btn-mint {
+            background: var(--mint-500);
+            color: var(--choco-900);
+            transition: all 0.3s ease;
+        }
+        .btn-mint:hover {
+            background: var(--mint-400);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(45, 212, 191, 0.4);
+        }
+
+        .loading-screen {
+            background: var(--choco-900);
+        }
+    </style>
+</head>
+<body class="selection:bg-mint-400 selection:text-choco-900">
+
+    <!-- 加载动画 -->
+    <div id="loadingScreen" class="fixed inset-0 z-[1000] loading-screen flex flex-col items-center justify-center transition-opacity duration-700">
+        <div class="relative w-32 h-32">
+            <div class="absolute inset-0 border-8 border-mint-500/20 rounded-full"></div>
+            <div class="absolute inset-0 border-8 border-mint-500 rounded-full border-t-transparent animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <i class="fas fa-ice-cream text-mint-500 text-4xl animate-bounce"></i>
+            </div>
+        </div>
+        <!-- Updated print statement from 'Hello' context to 'Goodbye' -->
+        <p class="mt-10 font-black tracking-[0.5em] text-mint-500 text-sm uppercase">Goodbye</p>
+    </div>
+
+    <div id="danmakuContainer" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
+
+    <!-- 导航栏 -->
+    <nav class="sticky top-0 z-40 glass border-b border-mint-100 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-5 group cursor-pointer">
+                <div class="relative">
+                    <div class="w-14 h-14 bg-choco-900 rounded-[1.2rem] rotate-6 group-hover:rotate-[15deg] transition-all duration-500 shadow-xl flex items-center justify-center border-2 border-mint-500/30">
+                        <i class="fas fa-cookie-bite text-mint-500 text-2xl"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight mint-gradient-text">子墨·时光机</h1>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-mint-500 animate-pulse"></span>
+                        <span class="text-[10px] uppercase font-black text-choco-800/40 tracking-[0.2em]">The Mint Collection</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button onclick="openModal('danmakuModal')" class="hidden md:flex items-center justify-center w-12 h-12 rounded-2xl glass hover:border-mint-500 transition-all text-choco-900">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+                <button onclick="openModal('addMomentModal')" class="bg-choco-900 text-mint-400 px-8 py-3.5 rounded-2xl font-black text-sm shadow-2xl hover:brightness-125 active:scale-95 transition-all flex items-center gap-3">
+                    <i class="fas fa-camera"></i><span class="hidden sm:inline">捕捉薄荷瞬间</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-6 py-10 md:py-16 space-y-20">
+        
+        <!-- 个人资料面板 -->
+        <section class="relative mint-card-gradient rounded-[4rem] p-10 md:p-16 overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.4)]">
+            <div class="absolute top-0 right-0 w-1/3 h-full bg-mint-500/5 blur-[100px]"></div>
+            <div class="absolute -bottom-20 -right-20 w-80 h-80 bg-mint-500/10 rounded-full blur-[80px]"></div>
+
+            <div class="relative z-10 flex flex-col lg:flex-row items-center gap-14">
+                <!-- 头像区域 -->
+                <div class="relative group" onclick="document.getElementById('avatarInput').click()">
+                    <div class="w-56 h-56 md:w-72 md:h-72 rounded-[3.5rem] p-2 bg-gradient-to-br from-mint-500 to-transparent rotate-3 group-hover:rotate-0 transition-all duration-700 shadow-2xl cursor-pointer">
+                        <div class="w-full h-full rounded-[3rem] overflow-hidden border-4 border-choco-900">
+                            <img id="profileAvatar" src="https://p6.itc.cn/images01/20231215/224a1b0b555e4b6eb35a39626359e19d.jpeg" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
+                        </div>
+                    </div>
+                    <div id="avatarLoading" class="hidden absolute inset-0 flex items-center justify-center bg-choco-900/80 rounded-[3.5rem] m-2">
+                        <div class="w-10 h-10 border-4 border-mint-500 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
+                    <div class="absolute -bottom-2 -right-2 bg-mint-500 p-5 rounded-3xl shadow-2xl text-choco-900 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <input type="file" id="avatarInput" hidden accept="image/*" onchange="uploadFile(event, 'avatar')">
+                </div>
+
+                <!-- 文本区域 -->
+                <div class="flex-1 text-center lg:text-left space-y-8">
+                    <span class="inline-block px-6 py-2 rounded-full bg-mint-500/10 border border-mint-500/20 text-mint-500 text-[10px] font-black uppercase tracking-[0.3em]">Official Member</span>
+                    <div>
+                        <h2 class="text-7xl md:text-8xl font-black text-white tracking-tighter leading-none mb-6">张子墨</h2>
+                        <p id="profileBio" class="text-mint-100/60 text-xl md:text-2xl font-medium max-w-2xl leading-relaxed italic font-light">
+                            "薄荷味的空气，巧克力的余韵，和在这里相遇的你们。"
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-4 justify-center lg:justify-start">
+                        <div class="glass border-white/10 px-8 py-4 rounded-[2rem] flex items-center gap-4 group hover:bg-mint-500/20 transition-all">
+                            <div class="w-10 h-10 rounded-xl bg-mint-500/20 flex items-center justify-center text-mint-500 group-hover:scale-110 transition-transform"><i class="fas fa-bolt"></i></div>
+                            <span id="momentCountHero" class="text-white font-black text-lg">0 瞬间</span>
+                        </div>
+                        <div class="glass border-white/10 px-8 py-4 rounded-[2rem] flex items-center gap-4 group hover:bg-rose-500/20 transition-all">
+                            <div class="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-400 group-hover:scale-110 transition-transform"><i class="fas fa-heart"></i></div>
+                            <span class="text-white font-black text-lg">5.2k 喜爱</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 时光档案 -->
+        <section class="space-y-12">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8 px-4">
+                <div class="space-y-3">
+                    <h3 class="text-5xl font-black text-choco-900 tracking-tighter italic">时光档案</h3>
+                    <div class="flex items-center gap-3">
+                        <div class="h-1.5 w-12 bg-mint-500 rounded-full"></div>
+                        <p id="momentCountDisplay" class="text-xs font-black text-choco-800/40 uppercase tracking-widest">Total 0 Captured</p>
+                    </div>
+                </div>
+                <div class="flex bg-choco-900/5 p-2 rounded-[2rem] glass">
+                    <button class="px-10 py-3.5 bg-choco-900 text-mint-500 rounded-[1.5rem] font-black text-sm shadow-xl transition-all">ALL</button>
+                    <button class="px-10 py-3.5 text-choco-900/40 hover:text-choco-900 rounded-[1.5rem] font-black text-sm transition-all">RECENT</button>
+                </div>
+            </div>
+            
+            <div id="momentsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+                <!-- 动态内容 -->
+            </div>
+        </section>
+
+        <!-- 留言板 -->
+        <section class="relative glass rounded-[5rem] p-10 md:p-20 shadow-2xl overflow-hidden border-2 border-mint-500/10">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-transparent via-mint-500 to-transparent"></div>
+            
+            <div class="relative z-10 flex flex-col gap-16">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                    <div class="flex items-center gap-8">
+                        <div class="w-20 h-20 bg-choco-900 rounded-[2.5rem] flex items-center justify-center text-mint-500 shadow-2xl shadow-choco-900/40 animate-float border-2 border-mint-500/20">
+                            <i class="fas fa-quote-left text-3xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-4xl font-black text-choco-900">给子墨的信</h3>
+                            <p class="text-sm font-black text-mint-500/60 uppercase tracking-[0.4em]">Mint Chocolate Box</p>
+                        </div>
+                    </div>
+                    <button onclick="openModal('danmakuModal')" class="btn-mint px-10 py-5 rounded-[2rem] font-black text-lg flex items-center gap-4">
+                        <span>我也要写</span><i class="fas fa-pen-nib"></i>
+                    </button>
+                </div>
+
+                <div id="messageBoard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- 动态内容 -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 弹窗：存入瞬间 -->
+    <div id="addMomentModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-6 bg-choco-900/90 backdrop-blur-xl">
+        <div class="bg-white w-full max-w-2xl rounded-[4rem] shadow-2xl overflow-hidden transform transition-all scale-90 opacity-0 duration-500" id="addMomentContent">
+            <div class="p-10 md:p-16 space-y-10">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-4xl font-black text-choco-900 tracking-tighter">新时刻</h3>
+                    <button onclick="closeModal('addMomentModal')" class="w-14 h-14 flex items-center justify-center rounded-3xl bg-mint-50 text-choco-900 hover:bg-red-500 hover:text-white transition-all">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-8">
+                    <div onclick="document.getElementById('momentFileInput').click()" class="relative group aspect-video w-full rounded-[3rem] border-4 border-dashed border-mint-200 bg-mint-50/50 flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all hover:border-mint-500 hover:bg-mint-50">
+                        <img id="previewImage" class="hidden w-full h-full object-cover">
+                        <div id="uploadPlaceholder" class="flex flex-col items-center gap-5 text-mint-500">
+                            <div class="w-20 h-20 rounded-[2rem] bg-white flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-500"><i class="fas fa-cloud-upload-alt text-3xl"></i></div>
+                            <span class="text-xs font-black uppercase tracking-[0.4em]">选择薄荷色的照片</span>
+                        </div>
+                        <input type="file" id="momentFileInput" hidden accept="image/*" onchange="uploadFile(event, 'moment')">
+                    </div>
+
+                    <div class="space-y-3">
+                        <label class="text-[11px] font-black uppercase tracking-[0.3em] text-choco-800/30 ml-6">在这里写下心情</label>
+                        <input id="momentTitle" type="text" placeholder="比如：今天也甜甜的..." class="w-full px-10 py-6 rounded-[2.5rem] bg-mint-50/30 border-2 border-transparent focus:border-mint-500 focus:bg-white outline-none font-bold text-choco-900 transition-all">
+                    </div>
+
+                    <button onclick="saveMoment()" id="saveBtn" class="w-full bg-choco-900 text-mint-500 font-black py-7 rounded-[3rem] shadow-2xl hover:brightness-150 active:scale-95 transition-all flex items-center justify-center gap-4 text-xl">
+                        <i class="fas fa-check-circle"></i>确认存入时光机
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 弹窗：发送弹幕 -->
+    <div id="danmakuModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-6 bg-choco-900/90 backdrop-blur-xl">
+        <div class="bg-white w-full max-w-lg rounded-[4rem] shadow-2xl p-12 transform transition-all scale-90 opacity-0 duration-500" id="danmakuContent">
+            <div class="flex justify-between items-center mb-12">
+                <div class="flex items-center gap-5">
+                    <div class="w-14 h-14 bg-mint-500 rounded-3xl flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane text-choco-900 text-xl"></i></div>
+                    <h3 class="text-3xl font-black text-choco-900">投递寄语</h3>
+                </div>
+                <button onclick="closeModal('danmakuModal')" class="text-gray-300 hover:text-choco-900 transition-colors"><i class="fas fa-times text-2xl"></i></button>
+            </div>
+            <div class="space-y-8">
+                <textarea id="danmakuInput" maxlength="60" rows="3" placeholder="说点什么让子墨看到吧..." class="w-full px-10 py-8 rounded-[3rem] bg-mint-50/30 border-2 border-transparent focus:border-mint-500 focus:bg-white outline-none font-black text-lg resize-none transition-all shadow-inner"></textarea>
+                <button onclick="sendDanmaku()" class="w-full btn-mint font-black py-6 rounded-[3rem] shadow-2xl flex items-center justify-center gap-4 text-xl">
+                    <i class="fas fa-bolt"></i>立刻发射
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // 配置初始化
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'zimo-mint-v3';
+
+        let user = null;
+        let tempImage = null;
+
+        // UI 助手
+        window.openModal = (id) => {
+            const el = document.getElementById(id);
+            const inner = el.children[0];
+            el.classList.remove('hidden');
+            el.classList.add('flex');
+            setTimeout(() => {
+                inner.classList.remove('scale-90', 'opacity-0');
+                inner.classList.add('scale-100', 'opacity-100');
+            }, 50);
+        };
+
+        window.closeModal = (id) => {
+            const el = document.getElementById(id);
+            const inner = el.children[0];
+            inner.classList.remove('scale-100', 'opacity-100');
+            inner.classList.add('scale-90', 'opacity-0');
+            setTimeout(() => {
+                el.classList.remove('flex');
+                el.classList.add('hidden');
+            }, 400);
+        };
+
+        // 图像压缩逻辑（薄巧色优化）
+        async function processImage(base64, size = 1000) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.src = base64;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    if (w > size) { h = (size / w) * h; w = size; }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    resolve(canvas.toDataURL('image/jpeg', 0.8));
+                };
+            });
+        }
+
+        window.uploadFile = async (e, type) => {
+            if (!user) return;
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (ev) => {
+                const compressed = await processImage(ev.target.result);
+                if (type === 'avatar') {
+                    try {
+                        document.getElementById('avatarLoading').classList.remove('hidden');
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'profile', 'main'), { avatar: compressed }, { merge: true });
+                    } catch (err) { console.error(err); } 
+                    finally { document.getElementById('avatarLoading').classList.add('hidden'); }
+                } else {
+                    tempImage = compressed;
+                    const preview = document.getElementById('previewImage');
+                    preview.src = compressed;
+                    preview.classList.remove('hidden');
+                    document.getElementById('uploadPlaceholder').classList.add('hidden');
+                }
+            };
+            reader.readAsDataURL(file);
+        };
+
+        // 数据操作
+        window.saveMoment = async () => {
+            const title = document.getElementById('momentTitle').value.trim();
+            if (!tempImage || !title || !user) return;
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在存入时光机...';
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'moments'), {
+                    title, imageUrl: tempImage, createdAt: serverTimestamp(), uid: user.uid
+                });
+                closeModal('addMomentModal');
+                tempImage = null;
+                document.getElementById('momentTitle').value = "";
+                document.getElementById('previewImage').classList.add('hidden');
+                document.getElementById('uploadPlaceholder').classList.remove('hidden');
+            } catch (err) { console.error(err); } 
+            finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check-circle"></i> 确认存入时光机'; }
+        };
+
+        window.sendDanmaku = async () => {
+            const input = document.getElementById('danmakuInput');
+            const text = input.value.trim();
+            if (!text || !user) return;
+
+            try {
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'messages'), {
+                    text, createdAt: serverTimestamp(), uid: user.uid
+                });
+                input.value = "";
+                closeModal('danmakuModal');
+            } catch (err) { console.error(err); }
+        };
+
+        window.deleteMoment = async (id) => {
+            if (!user) return;
+            if (confirm("要从薄巧记忆中移除这段时光吗？")) {
+                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'moments', id));
+            }
+        };
+
+        function spawnDanmaku(text) {
+            const container = document.getElementById('danmakuContainer');
+            const el = document.createElement('div');
+            el.className = 'danmaku-item';
+            el.innerText = text;
+            el.style.top = `${Math.random() * 50 + 20}%`;
+            el.style.animationDuration = `${Math.random() * 5 + 12}s`;
+            container.appendChild(el);
+            el.onanimationend = () => el.remove();
+        }
+
+        // 实时同步
+        function initSync() {
+            // Profile
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'profile', 'main'), snap => {
+                if (snap.exists() && snap.data().avatar) document.getElementById('profileAvatar').src = snap.data().avatar;
+            });
+
+            // Moments
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'moments'), snap => {
+                const grid = document.getElementById('momentsGrid');
+                grid.innerHTML = "";
+                document.getElementById('momentCountHero').innerText = `${snap.size} 瞬间`;
+                document.getElementById('momentCountDisplay').innerText = `Total ${snap.size} Captured`;
+
+                snap.forEach(d => {
+                    const data = d.data();
+                    const card = document.createElement('div');
+                    card.className = "moment-card group relative bg-white rounded-[3.5rem] overflow-hidden p-4 shadow-xl border-b-8 border-choco-900";
+                    card.innerHTML = `
+                        <div class="relative overflow-hidden rounded-[2.8rem] aspect-[4/5] bg-mint-50">
+                            <img src="${data.imageUrl}" class="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-choco-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-8">
+                                <p class="text-white font-black text-xl translate-y-4 group-hover:translate-y-0 transition-transform">${data.title}</p>
+                            </div>
+                            <button onclick="deleteMoment('${d.id}')" class="absolute top-6 right-6 w-12 h-12 rounded-3xl bg-white/20 backdrop-blur-md text-white opacity-0 group-hover:opacity-100 hover:bg-red-500 transition-all">
+                                <i class="fas fa-trash-alt text-sm"></i>
+                            </button>
+                        </div>
+                        <div class="mt-8 px-4 pb-4">
+                            <h4 class="font-black text-choco-900 text-xl truncate">${data.title}</h4>
+                            <div class="flex items-center gap-2 mt-2">
+                                <span class="w-2 h-2 rounded-full bg-mint-500"></span>
+                                <p class="text-[10px] font-black text-choco-800/20 uppercase tracking-[0.2em]">Mint Moment Archive</p>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            });
+
+            // Messages
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'messages'), snap => {
+                const board = document.getElementById('messageBoard');
+                board.innerHTML = "";
+                snap.forEach(d => {
+                    const msg = d.data();
+                    const el = document.createElement('div');
+                    el.className = "bg-white p-8 rounded-[3.5rem] border-l-[12px] border-mint-500 shadow-xl hover:-translate-y-2 transition-all";
+                    el.innerHTML = `<p class="font-black text-choco-900 text-lg leading-relaxed italic">"${msg.text}"</p>`;
+                    board.appendChild(el);
+                    spawnDanmaku(msg.text);
+                });
+            });
+        }
+
+        // 启动程序
+        async function start() {
+            onAuthStateChanged(auth, u => {
+                if (u) {
+                    user = u;
+                    initSync();
+                    document.getElementById('loadingScreen').style.opacity = '0';
+                    setTimeout(() => document.getElementById('loadingScreen').remove(), 700);
+                }
+            });
+
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (err) { console.error(err); document.getElementById('loadingScreen').remove(); }
+        }
+
+        window.onload = start;
+    </script>
+</body>
+</html>
