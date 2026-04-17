@@ -3,399 +3,326 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>张子墨·薄巧时光机</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>张子墨 ZHANG ZIMO | 官方个人档案</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
-        
+        :root {
+            --bg-color: #0d0d0d;      /* 纯黑背景 */
+            --accent-color: #9e9e9e;  /* 银灰色强调 */
+            --text-main: #ffffff;
+            --text-sub: #888888;
+            --font-title: 'Noto Serif SC', serif;
+            --font-body: 'Noto Sans SC', sans-serif;
+            --ease: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #F1FBF9;
-            color: #2C1E16;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-body);
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .mint-gradient {
-            background: linear-gradient(135deg, #A7FFEB 0%, #84E1CC 100%);
-        }
-
-        @keyframes danmaku {
-            from { transform: translateX(100vw); }
-            to { transform: translateX(-150%); }
-        }
-
-        .danmaku-item {
+        /* 自定义光标 */
+        #cursor {
             position: fixed;
-            white-space: nowrap;
-            z-index: 60;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
             pointer-events: none;
-            font-weight: 900;
-            font-size: 1.25rem;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            animation: danmaku linear forwards;
+            mix-blend-mode: difference;
+            z-index: 9999;
+            transition: transform 0.3s var(--ease);
         }
 
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #A7FFEB;
-            border-radius: 10px;
-        }
-
-        .loading-overlay {
+        /* 导航栏 */
+        header {
             position: fixed;
-            inset: 0;
-            background: #E0F2F1;
-            z-index: 1000;
+            top: 0;
+            width: 100%;
+            padding: 30px 50px;
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .logo {
+            font-family: var(--font-title);
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+        }
+
+        nav a {
+            color: var(--text-main);
+            text-decoration: none;
+            margin-left: 30px;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            opacity: 0.6;
+            transition: 0.3s;
+        }
+
+        nav a:hover { opacity: 1; }
+
+        /* Hero 视频区域 */
+        .hero {
+            height: 100vh;
+            display: flex;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-video-wrap {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 120%; /* 视差预留空间 */
+            z-index: -1;
+        }
+
+        .hero-video-wrap video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* 意识流风格：调低亮度，增加一点点模糊和冷色调 */
+    filter: brightness(0.6) contrast(1.1) saturate(0.8);
+}
+
+/* 添加一个呼吸感的文字动画，模拟冬天的感觉 */
+.reveal-text {
+    animation: breathe 4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+    0%, 100% { opacity: 0.8; transform: translateY(0); filter: blur(0px); }
+    50% { opacity: 1; transform: translateY(-5px); filter: blur(1px); }
+}
+
+        .hero-info { text-align: center; }
+        .hero-info h1 {
+            font-family: var(--font-title);
+            font-size: 8vw;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .hero-info p {
+            font-size: 1rem;
+            letter-spacing: 8px;
+            color: var(--accent-color);
+            text-transform: uppercase;
+        }
+
+        /* 档案详情部分 */
+        .about-section {
+            padding: 150px 10%;
+            display: flex;
+            gap: 100px;
+            align-items: center;
+        }
+
+        .about-text h2 {
+            font-family: var(--font-title);
+            font-size: 3rem;
+            margin-bottom: 30px;
+        }
+
+        .about-details p {
+            font-size: 1.1rem;
+            line-height: 2;
+            color: var(--text-sub);
+            margin-bottom: 10px;
+        }
+
+        .about-details span { color: var(--text-main); font-weight: 600; }
+
+        /* 照片墙区域 */
+        .gallery { padding: 100px 5%; }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            grid-auto-rows: 300px;
+        }
+        .grid-item { overflow: hidden; position: relative; border-radius: 4px; }
+        .grid-item img {
+            width: 100%; height: 100%; object-fit: cover;
+            transition: 1s var(--ease);
+            filter: grayscale(100%);
+        }
+        .grid-item:hover img { transform: scale(1.1); filter: grayscale(0%); }
+        .span-2 { grid-column: span 2; }
+        .row-2 { grid-row: span 2; }
+
+        /* 音乐轮播区域 */
+        .swiper-section { padding: 100px 0; background: #080808; }
+        .swiper { width: 100%; padding: 50px 0; }
+        .swiper-slide {
+            width: 400px; height: 500px;
+            background: #111;
+            display: flex; flex-direction: column;
+            border-radius: 8px; overflow: hidden;
+            opacity: 0.3; transition: 0.5s;
+        }
+        .swiper-slide-active { opacity: 1; transform: scale(1.05); }
+        .swiper-slide img { width: 100%; height: 80%; object-fit: cover; }
+        .slide-info { padding: 20px; }
+
+        footer {
+            padding: 100px 50px;
+            text-align: center;
+            border-top: 1px solid #222;
+            color: var(--text-sub);
+            font-size: 0.8rem;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            header { padding: 20px; }
+            .hero-info h1 { font-size: 4rem; }
+            .about-section { flex-direction: column; text-align: center; gap: 50px; }
+            .grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
-<body class="pb-24">
+<body>
 
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="loading-overlay">
-        <div class="w-16 h-16 border-4 border-[#3D2B1F] border-t-[#A7FFEB] rounded-full animate-spin"></div>
-        <span class="mt-4 text-[#3D2B1F] font-bold tracking-widest text-sm">MINTY LOADING...</span>
-    </div>
+    <div id="cursor"></div>
 
-    <!-- Danmaku Container -->
-    <div id="danmakuContainer" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
-
-    <!-- Header -->
-    <header class="sticky top-0 z-40 bg-[#A7FFEB]/90 backdrop-blur-md border-b border-[#84E1CC] px-6 py-4">
-        <div class="max-w-5xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-[#3D2B1F] rounded-2xl text-[#A7FFEB] shadow-lg">
-                    <i class="fas fa-music text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-black tracking-tighter text-[#3D2B1F]">张子墨 <span class="font-light">| MOMENTS</span></h1>
-                    <p class="text-[10px] uppercase tracking-[0.2em] text-[#4E7A71]">Mint Chocolate Edition</p>
-                </div>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="toggleModal('danmakuModal', true)" class="bg-white text-[#3D2B1F] p-2.5 rounded-full shadow-md border border-[#A7FFEB] hover:bg-[#A7FFEB]/10 transition-all">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-                <button onclick="toggleModal('addMomentModal', true)" class="bg-[#3D2B1F] text-[#A7FFEB] px-5 py-2.5 rounded-full font-bold text-sm shadow-md transition-all active:scale-95 flex items-center gap-2 hover:bg-[#5D4037]">
-                    <i class="fas fa-plus"></i><span>存入照片</span>
-                </button>
-            </div>
-        </div>
+    <header>
+        <div class="logo">ZHANG ZIMO</div>
+        <nav>
+            <a href="#about">关于</a>
+            <a href="#gallery">影像</a>
+            <a href="#music">作品</a>
+        </nav>
     </header>
 
-    <main class="max-w-5xl mx-auto p-6 space-y-12">
-        <!-- Profile Card -->
-        <div class="bg-[#3D2B1F] rounded-[2.5rem] p-8 relative overflow-hidden shadow-2xl">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-[#A7FFEB] opacity-10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
-            <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
-                <div class="relative group cursor-pointer" onclick="document.getElementById('avatarInput').click()">
-                    <div class="w-32 h-32 rounded-full border-4 border-[#A7FFEB] p-1 overflow-hidden shadow-xl bg-white">
-                        <img id="profileAvatar" src="https://p6.itc.cn/images01/20231215/224a1b0b555e4b6eb35a39626359e19d.jpeg" class="w-full h-full object-cover rounded-full transition-all duration-500 group-hover:scale-110 group-hover:brightness-50">
-                    </div>
-                    <div class="absolute inset-0 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                        <i class="fas fa-edit text-2xl"></i>
-                    </div>
-                    <input type="file" id="avatarInput" hidden accept="image/*" onchange="handleFileUpload(event, 'avatar')">
-                </div>
-
-                <div class="text-center md:text-left flex-1">
-                    <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
-                        <h2 class="text-3xl font-bold text-[#A7FFEB]">张子墨</h2>
-                        <i class="fas fa-sparkles text-[#FFD54F]"></i>
-                    </div>
-                    <p id="profileBio" class="text-[#B2DFDB] text-sm max-w-md leading-relaxed italic">
-                        ❄️ 雪景中的子墨，是冬日里最清新的薄荷巧克力。
-                    </p>
-                    <div class="flex gap-3 mt-4 justify-center md:justify-start">
-                        <span class="px-3 py-1 bg-[#A7FFEB]/10 border border-[#A7FFEB]/30 rounded-full text-[10px] text-[#A7FFEB] uppercase tracking-wider font-bold"># SnowGentle</span>
-                        <span class="px-3 py-1 bg-[#A7FFEB]/10 border border-[#A7FFEB]/30 rounded-full text-[10px] text-[#A7FFEB] uppercase tracking-wider font-bold"># MainVocal</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Gallery Section -->
-        <section>
-            <div class="flex items-center gap-2 mb-6 px-2">
-                <i class="fas fa-image text-[#3D2B1F]"></i>
-                <h3 class="font-black text-xl text-[#3D2B1F] tracking-tight">私人时光机 <span id="momentCount" class="text-[#4E7A71] text-sm font-normal">(0)</span></h3>
-            </div>
-            <div id="momentsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Moments will be injected here -->
-            </div>
-        </section>
-
-        <!-- Message Board -->
-        <section class="bg-white/40 rounded-[3rem] p-8 border border-[#A7FFEB]/30 shadow-inner">
-            <div class="flex items-center justify-between mb-8">
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-comment-dots text-[#3D2B1F]"></i>
-                    <h3 class="font-black text-2xl text-[#3D2B1F] tracking-tight">墨色寄语</h3>
-                </div>
-                <button onclick="toggleModal('danmakuModal', true)" class="text-sm font-black text-[#4E7A71] underline decoration-[#A7FFEB] decoration-2">我也要留言</button>
-            </div>
-            <div id="messageBoard" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Messages will be injected here -->
-            </div>
-        </section>
-    </main>
-
-    <!-- Modal: Add Moment -->
-    <div id="addMomentModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-[#2C1E16]/60 backdrop-blur-md">
-        <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 transform scale-95 opacity-0 transition-all duration-300">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-black text-[#3D2B1F]">存入时光</h3>
-                <button onclick="toggleModal('addMomentModal', false)"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div class="space-y-4">
-                <div onclick="document.getElementById('momentFileInput').click()" class="w-full aspect-video rounded-3xl border-2 border-dashed border-[#A7FFEB] bg-[#F1FBF9] flex flex-col items-center justify-center cursor-pointer overflow-hidden relative">
-                    <img id="previewImage" class="hidden w-full h-full object-cover">
-                    <div id="uploadPlaceholder" class="flex flex-col items-center text-[#4E7A71]">
-                        <i class="fas fa-cloud-upload-alt text-2xl mb-2"></i>
-                        <span class="text-sm font-black">点击选择照片</span>
-                        <span class="text-[10px] opacity-60">30MB以内 (数据库限1MB)</span>
-                    </div>
-                    <input type="file" id="momentFileInput" hidden accept="image/*" onchange="handleFileUpload(event, 'moment')">
-                </div>
-                <input id="momentTitle" type="text" placeholder="标题：例如 240416 机场饭拍" class="w-full px-6 py-4 rounded-2xl bg-[#F1FBF9] border border-[#A7FFEB] focus:outline-none font-bold">
-                <input id="momentDate" type="date" class="w-full px-6 py-4 rounded-2xl bg-[#F1FBF9] border border-[#A7FFEB] focus:outline-none font-bold">
-                <textarea id="momentDesc" placeholder="这一刻的心情..." class="w-full px-6 py-4 rounded-2xl bg-[#F1FBF9] border border-[#A7FFEB] focus:outline-none h-24 resize-none"></textarea>
-                <button onclick="saveMoment()" id="saveBtn" class="w-full bg-[#3D2B1F] text-[#A7FFEB] font-black py-4 rounded-3xl shadow-xl active:scale-95 transition-all">确认存入</button>
-            </div>
-        </div>
+<section class="hero">
+    <div class="hero-video-wrap">
+        <video autoplay muted loop playsinline src="zimo_winter.mp4"></video>
     </div>
+    <div class="hero-info">
+        <h1 class="reveal-text">17岁的冬季</h1>
+        <p style="letter-spacing: 5px;">ZHANG ZIMO / IN MY FEELINGS</p>
+        <div class="scrolling-line" style="width: 1px; height: 80px; background: #fff; margin: 20px auto; opacity: 0.5;"></div>
+    </div>
+</section>
 
-    <!-- Modal: Danmaku -->
-    <div id="danmakuModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-[#2C1E16]/60 backdrop-blur-md">
-        <div class="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 transform scale-95 opacity-0 transition-all duration-300">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-black text-[#3D2B1F]">发送弹幕</h3>
-                <button onclick="toggleModal('danmakuModal', false)"><i class="fas fa-times text-xl"></i></button>
-            </div>
-            <div class="space-y-4">
-                <input id="danmakuInput" type="text" maxlength="40" placeholder="写下对子墨的告白..." class="w-full px-6 py-5 rounded-2xl bg-[#F1FBF9] border border-[#A7FFEB] focus:outline-none font-black text-lg">
-                <button onclick="sendDanmaku()" class="w-full bg-[#A7FFEB] text-[#3D2B1F] font-black py-5 rounded-3xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 text-lg">
-                    <i class="fas fa-paper-plane"></i> 咻~
-                </button>
+    <section id="about" class="about-section">
+        <div class="about-text">
+            <h2>创作歌手<br>张子墨</h2>
+        </div>
+        <div class="about-details">
+            <p><span>生日：</span>2008年2月20日</p>
+            <p><span>核心特质：</span>不被定义的音乐灵魂，执着于节奏与旋律的碰撞。</p>
+            <p><span>代表作：</span>在每一个创作的深夜，寻找名为“自愈”的音符。</p>
+            <p>他以独特的嗓音和深刻的歌词，书写着属于18岁的少年意气与沉思。</p>
+        </div>
+    </section>
+
+    <section id="gallery" class="gallery">
+        <div class="grid">
+            <div class="grid-item span-2 row-2"><img src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=2070" alt="子墨"></div>
+            <div class="grid-item"><img src="https://images.unsplash.com/photo-1493225255756-d9584f8606e9?q=80&w=2070" alt="创作"></div>
+            <div class="grid-item row-2"><img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070" alt="舞台"></div>
+            <div class="grid-item"><img src="https://images.unsplash.com/photo-1514525253361-bee8a187499b?q=80&w=2070" alt="灯光"></div>
+            <div class="grid-item span-2"><img src="https://images.unsplash.com/photo-1516280440614-37939bb9120?q=80&w=2070" alt="录音室"></div>
+        </div>
+    </section>
+
+    <section id="music" class="swiper-section">
+        <div class="swiper">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide">
+                    <img src="https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?q=80&w=2070">
+                    <div class="slide-info"><h3>舞台演出</h3><p>Live Performance</p></div>
+                </div>
+                <div class="swiper-slide">
+                    <img src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=2070">
+                    <div class="slide-info"><h3>词曲创作</h3><p>Original Works</p></div>
+                </div>
+                <div class="swiper-slide">
+                    <img src="https://images.unsplash.com/photo-1459749411177-042180ce673c?q=80&w=2070">
+                    <div class="slide-info"><h3>练习瞬间</h3><p>Daily Routine</p></div>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Firebase SDKs -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+    <footer>
+        <p>© 2026 张子墨 ZHANG ZIMO ARCHIVE. 为创作与才华而建。</p>
+    </footer>
 
-        // Global State
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'zimo-moments-html';
-        
-        let currentUser = null;
-        let tempImageUrl = null;
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.27/bundled/lenis.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-        // --- Functions Exposed to Window ---
-        window.toggleModal = (id, show) => {
-            const modal = document.getElementById(id);
-            const content = modal.querySelector('div');
-            if (show) {
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-                setTimeout(() => {
-                    content.classList.remove('scale-95', 'opacity-0');
-                    content.classList.add('scale-100', 'opacity-100');
-                }, 10);
-            } else {
-                content.classList.add('scale-95', 'opacity-0');
-                content.classList.remove('scale-100', 'opacity-100');
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                    modal.classList.remove('flex');
-                }, 300);
-            }
-        };
-
-        window.handleFileUpload = (e, type) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            // 30MB 限制
-            if (file.size > 30 * 1024 * 1024) {
-                alert("文件太大啦！请上传 30MB 以内的图片。");
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                const base64Data = event.target.result;
-
-                if (type === 'avatar') {
-                    try {
-                        const profileRef = doc(db, 'artifacts', appId, 'public', 'data', 'profile', 'main');
-                        await setDoc(profileRef, { avatar: base64Data }, { merge: true });
-                        document.getElementById('profileAvatar').src = base64Data;
-                    } catch (err) {
-                        alert("头像上传失败：数据库单文件上限为 1MB，请尝试更小的图片。");
-                    }
-                } else {
-                    tempImageUrl = base64Data;
-                    const preview = document.getElementById('previewImage');
-                    preview.src = base64Data;
-                    preview.classList.remove('hidden');
-                    document.getElementById('uploadPlaceholder').classList.add('hidden');
-                }
-            };
-            reader.readAsDataURL(file);
-        };
-
-        window.saveMoment = async () => {
-            const title = document.getElementById('momentTitle').value;
-            const date = document.getElementById('momentDate').value;
-            const desc = document.getElementById('momentDesc').value;
-
-            if (!tempImageUrl || !title) return alert("请先上传照片并填写标题！");
-
-            try {
-                const momentsRef = collection(db, 'artifacts', appId, 'public', 'data', 'moments');
-                await addDoc(momentsRef, {
-                    title, date, description: desc, imageUrl: tempImageUrl, createdAt: serverTimestamp()
-                });
-                
-                // Reset
-                document.getElementById('momentTitle').value = "";
-                document.getElementById('momentDate').value = "";
-                document.getElementById('momentDesc').value = "";
-                document.getElementById('previewImage').classList.add('hidden');
-                document.getElementById('uploadPlaceholder').classList.remove('hidden');
-                tempImageUrl = null;
-                toggleModal('addMomentModal', false);
-            } catch (err) {
-                alert("保存失败：数据库限制单条目 1MB，请压缩图片后重试。");
-            }
-        };
-
-        window.sendDanmaku = async () => {
-            const text = document.getElementById('danmakuInput').value;
-            if (!text.trim()) return;
-
-            try {
-                const msgRef = collection(db, 'artifacts', appId, 'public', 'data', 'messages');
-                await addDoc(msgRef, {
-                    text, userId: currentUser.uid, createdAt: serverTimestamp()
-                });
-                
-                spawnDanmaku(text, true);
-                document.getElementById('danmakuInput').value = "";
-                toggleModal('danmakuModal', false);
-            } catch (err) { console.error(err); }
-        };
-
-        window.deleteItem = async (col, id) => {
-            if (!confirm("确定要删除这一条记忆吗？")) return;
-            try {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', col, id));
-            } catch (err) { console.error(err); }
-        };
-
-        // --- Core Logic ---
-        function spawnDanmaku(text, isSelf = false) {
-            const container = document.getElementById('danmakuContainer');
-            const item = document.createElement('div');
-            item.className = 'danmaku-item';
-            item.innerText = text;
-            
-            const top = Math.random() * 70 + 10;
-            const duration = Math.random() * 8 + 10;
-            
-            item.style.top = `${top}%`;
-            item.style.color = isSelf ? '#3D2B1F' : (Math.random() > 0.5 ? '#A7FFEB' : '#3D2B1F');
-            item.style.animationDuration = `${duration}s`;
-            
-            container.appendChild(item);
-            item.addEventListener('animationend', () => item.remove());
+    <script>
+        // 初始化平滑滚动
+        const lenis = new Lenis();
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
         }
+        requestAnimationFrame(raf);
 
-        async function initApp() {
-            // Auth
-            await signInAnonymously(auth);
-            onAuthStateChanged(auth, (user) => {
-                currentUser = user;
-                if (user) document.getElementById('loadingScreen').style.opacity = '0';
-                setTimeout(() => document.getElementById('loadingScreen').remove(), 500);
-            });
+        // 自定义光标移动
+        const cursor = document.getElementById('cursor');
+        window.addEventListener('mousemove', e => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
+        });
 
-            // Listen Profile
-            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'profile', 'main'), (snap) => {
-                if (snap.exists()) {
-                    const data = snap.data();
-                    if (data.avatar) document.getElementById('profileAvatar').src = data.avatar;
-                    if (data.bio) document.getElementById('profileBio').innerText = data.bio;
-                }
-            });
+        // Hero 视频视差效果
+        gsap.to(".hero-video-wrap", {
+            y: "20%",
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".hero",
+                start: "top top",
+                end: "bottom top",
+                scrub: true
+            }
+        });
 
-            // Listen Moments
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'moments'), (snap) => {
-                const grid = document.getElementById('momentsGrid');
-                grid.innerHTML = "";
-                const docs = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => new Date(b.date) - new Date(a.date));
-                document.getElementById('momentCount').innerText = `(${docs.length})`;
-                
-                docs.forEach(m => {
-                    const el = document.createElement('div');
-                    el.className = "group bg-white rounded-[2rem] overflow-hidden shadow-md border border-[#A7FFEB]/20 hover:shadow-xl transition-all duration-500";
-                    el.innerHTML = `
-                        <div class="relative aspect-[3/4] overflow-hidden bg-[#F1FBF9]">
-                            <img src="${m.imageUrl}" class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110">
-                            <button onclick="deleteItem('moments', '${m.id}')" class="absolute top-4 right-4 bg-red-500/80 backdrop-blur-sm text-white p-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-all active:scale-90"><i class="fas fa-trash-alt text-xs"></i></button>
-                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
-                                <div class="text-[10px] bg-[#A7FFEB] text-[#3D2B1F] w-fit px-2 py-0.5 rounded font-black mb-1">${m.date || '无日期'}</div>
-                                <h4 class="font-bold text-white text-lg truncate">${m.title}</h4>
-                            </div>
-                        </div>
-                        <div class="p-5 bg-white"><p class="text-[#5D4037] text-xs leading-relaxed line-clamp-2 italic font-medium">“ ${m.description || '这一刻，无言但心动。'} ”</p></div>
-                    `;
-                    grid.appendChild(el);
-                });
-            });
+        // 标题文字渐显
+        gsap.from(".reveal-text", {
+            y: 100,
+            opacity: 0,
+            duration: 1.5,
+            ease: "power4.out",
+            delay: 0.5
+        });
 
-            // Listen Messages
-            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'messages'), (snap) => {
-                const board = document.getElementById('messageBoard');
-                board.innerHTML = "";
-                const msgs = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-                
-                msgs.forEach(msg => {
-                    const el = document.createElement('div');
-                    el.className = "bg-white p-6 rounded-[2rem] shadow-sm border-l-8 border-[#A7FFEB] relative group hover:-translate-y-1 transition-transform";
-                    el.innerHTML = `
-                        <i class="fas fa-quote-right absolute top-4 right-4 text-[#A7FFEB]/20 text-2xl"></i>
-                        <p class="text-[#3D2B1F] font-bold text-lg mb-4 pr-8 leading-snug">${msg.text}</p>
-                        <div class="flex items-center justify-between text-[10px] text-[#4E7A71]/60 font-bold uppercase tracking-wider">
-                            <div><i class="far fa-clock mr-1"></i> ${msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleString() : '刚刚'}</div>
-                            ${msg.userId === currentUser.uid ? `<button onclick="deleteItem('messages', '${msg.id}')" class="text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">撤回</button>` : ''}
-                        </div>
-                    `;
-                    board.appendChild(el);
-                    // Also trigger as temporary danmaku if it's new (last 5s)
-                    if (msg.createdAt && (Date.now() - msg.createdAt.seconds * 1000 < 5000)) {
-                        spawnDanmaku(msg.text);
-                    }
-                });
-            });
-        }
+        // 网格图片进入动画
+        gsap.from(".grid-item", {
+            scale: 0.8,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.1,
+            scrollTrigger: {
+                trigger: ".grid",
+                start: "top 80%"
+            }
+        });
 
-        window.onload = initApp;
+        // 初始化 Swiper
+        new Swiper('.swiper', {
+            slidesPerView: 'auto',
+            centeredSlides: true,
+            spaceBetween: 50,
+            loop: true,
+            grabCursor: true
+        });
     </script>
 </body>
 </html>
